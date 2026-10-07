@@ -1,24 +1,23 @@
-# ClickHouse Web Analytics
+# ClickHouse Web Analytics Demo
 
-Аналитический проект на ClickHouse.
-Демонстрирует создание оптимизированной схемы, вставку данных и расчёт ключевых продуктовых метрик.
+Демо-проект на ClickHouse: схема с MergeTree, аналитические запросы, расчёт продуктовых метрик.
 
 ## 🛠️ Технологии
 
-- ClickHouse (движок MergeTree)
+- ClickHouse (движок MergeTree, LowCardinality, партиционирование)
 - SQL (агрегации, работа с датами, функции ClickHouse)
 
 ## 📊 Схема данных
 
 Таблица `events` хранит логи веб-трафика.
 
-| Колонка       | Тип                    | Описание                       |
-|---------------|------------------------|--------------------------------|
-| event_time    | DateTime               | Время события                  |
-| visitor_id    | UInt64                 | ID посетителя                  |
+| Колонка       | Тип                    | Описание                        |
+|---------------|------------------------|---------------------------------|
+| event_time    | DateTime               | Время события                   |
+| visitor_id    | UInt64                 | ID посетителя                   |
 | event_type    | LowCardinality(String) | Тип события (`pageview`/`click`)|
-| url           | String                 | URL страницы                   |
-| duration_ms   | UInt32                 | Длительность в миллисекундах   |
+| url           | String                 | URL страницы                    |
+| duration_ms   | UInt32                 | Длительность в миллисекундах    |
 
 ### Особенности схемы
 
@@ -26,13 +25,23 @@
 - **`ORDER BY (event_time, visitor_id)`** — сортировка внутри партиции работает как индекс.
 - **`LowCardinality(String)`** — оптимизация для колонки с малым числом уникальных значений.
 
-## 🚀 Метрики и запросы
+---
 
-### 1. Уникальные посетители за сегодня (DAU)
+## 🚀 Запуск проекта
 
-Считаем количество уникальных посетителей за текущий день.
+Все шаги выполняются в [SQLize.online — ClickHouse](https://sqlize.online/sql/clickhouse/).
+
+### Шаг 1. Создание таблицы
 
 ```sql
-SELECT uniq(visitor_id) AS dau
-FROM events
-WHERE toDate(event_time) = today();
+CREATE TABLE events
+(
+    event_time  DateTime,
+    visitor_id  UInt64,
+    event_type  LowCardinality(String),
+    url         String,
+    duration_ms UInt32
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMM(event_time)
+ORDER BY (event_time, visitor_id);
