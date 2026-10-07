@@ -1,6 +1,6 @@
-# ClickHouse Web Analytics Demo
+# ClickHouse Web Analytics
 
-Демо-проект на ClickHouse: схема с MergeTree, аналитические запросы, расчёт продуктовых метрик.
+Проект на ClickHouse: схема с MergeTree, аналитические запросы, расчёт продуктовых метрик.
 
 ## 🛠️ Технологии
 
